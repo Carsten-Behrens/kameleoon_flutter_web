@@ -26,8 +26,6 @@ class _HomePageState extends State<HomePage> {
         trackingIntervalMilliseconds: 500,
         environment: "staging",
         isUniqueIdentifier: false,
-        domain: "example.com",
-        networkDomain: "company.com",
       );
       const siteCode = "4p5i382aoj";
       const visitor = "123";
