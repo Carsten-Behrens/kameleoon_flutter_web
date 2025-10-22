@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kameleoon_client_flutter/kameleoon_client_flutter.dart';
 
@@ -10,6 +11,7 @@ class _HomePageState extends State<HomePage> {
   KameleoonClient? kameleoonClient;
   String? error;
   String? visitorCode;
+  String? conversionMessage;
 
   @override
   void initState() {
@@ -43,6 +45,32 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _trackConversion() async {
+    try {
+      // Generate a random goal ID between 100000 and 999999
+      final random = Random();
+      final goalId = 100000 + random.nextInt(900000);
+
+      await kameleoonClient!.trackConversion(goalId);
+
+      setState(() {
+        conversionMessage = "Conversion tracked successfully! Goal ID: $goalId";
+      });
+    } on SDKNotReady catch (ex) {
+      setState(() {
+        conversionMessage = "SDK not ready: $ex";
+      });
+    } on VisitorCodeInvalid catch (ex) {
+      setState(() {
+        conversionMessage = "Visitor code invalid: $ex";
+      });
+    } on Exception catch (ex) {
+      setState(() {
+        conversionMessage = "Error tracking conversion: $ex";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (error != null) {
@@ -56,7 +84,32 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('Kameleoon Client Initialized!'),
-          if (visitorCode != null) Text('Visitor Code: $visitorCode'),
+          if (visitorCode != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Visitor Code: $visitorCode'),
+            ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _trackConversion,
+            child: Text('Track Conversion'),
+          ),
+          if (conversionMessage != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                conversionMessage!,
+                style: TextStyle(
+                  color:
+                      conversionMessage!.contains('Error') ||
+                          conversionMessage!.contains('invalid')
+                      ? Colors.red
+                      : Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
